@@ -1,0 +1,173 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Media – Admin{% endblock %}
+{% block page_title %}Photos & Videos{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-cloud-upload-alt"></i> Upload Media Files</h3></div>
+  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;margin-bottom:20px;">
+    <p style="font-size:.88rem;color:#1e40af;">
+      <i class="fa fa-info-circle"></i>
+      <strong>Supported formats:</strong> Photos: JPG, PNG, GIF, WEBP · Videos: MP4, WEBM, MOV, AVI · You can select multiple files at once.
+    </p>
+  </div>
+  <form method="POST" action="/admin/media" enctype="multipart/form-data" id="mediaUploadForm">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Select Files (photos and/or videos)</label>
+        <div class="file-upload-wrap">
+          <div class="file-upload-area" id="mediaDropArea">
+            <i class="fa fa-photo-video"></i>
+            <p><strong>Click to browse</strong> or drag & drop here</p>
+            <p style="font-size:.8rem;color:#9ca3af;margin-top:6px;">Photos &amp; Videos · Multiple files OK · Max 500MB per file</p>
+            <input type="file" name="media_files" accept="image/*,video/*" multiple id="mediaInput"
+              onchange="handleMediaSelect(this)"/>
+          </div>
+        </div>
+        <div id="mediaPreview" class="preview-grid" style="margin-top:16px;"></div>
+        <p id="selectedCount" style="font-size:.85rem;color:#6b7280;margin-top:8px;"></p>
+      </div>
+      <div class="form-group">
+        <label>Caption (applied to all selected files)</label>
+        <input type="text" name="caption" placeholder="Sunday Service, Christmas 2024, etc."/>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">
+          <option value="Service">Service</option>
+          <option value="Events">Events</option>
+          <option value="Worship">Worship</option>
+          <option value="Fellowship">Fellowship</option>
+          <option value="Youth">Youth</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;align-items:center;gap:16px;">
+      <button type="submit" class="btn btn-primary" id="uploadBtn">
+        <i class="fa fa-upload"></i> Upload Files
+      </button>
+      <div id="uploadProgress" style="display:none;flex:1;">
+        <div style="height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+          <div id="progressBar" style="height:100%;background:var(--primary);width:0%;transition:width .3s;border-radius:4px;"></div>
+        </div>
+        <p style="font-size:.82rem;color:#6b7280;margin-top:4px;" id="progressText">Uploading...</p>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h3><i class="fa fa-th"></i> Media Library ({{ media|length }} files)</h3>
+    <div style="display:flex;gap:8px;">
+      <button onclick="filterAdmin('all',this)" class="btn btn-sm btn-primary" id="filterAll">All</button>
+      <button onclick="filterAdmin('image',this)" class="btn btn-sm btn-outline" id="filterImg">Photos</button>
+      <button onclick="filterAdmin('video',this)" class="btn btn-sm btn-outline" id="filterVid">Videos</button>
+    </div>
+  </div>
+  {% if media %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;" id="adminMediaGrid">
+    {% for item in media %}
+    <div class="media-admin-item" data-type="{{ item.media_type }}"
+         style="border-radius:12px;overflow:hidden;background:#f9fafb;position:relative;border:2px solid #e5e7eb;">
+      {% if item.media_type == 'image' %}
+        <img src="/static/{{ item.filename }}" alt="{{ item.caption }}"
+             style="width:100%;aspect-ratio:1;object-fit:cover;display:block;"/>
+      {% else %}
+        <video src="/static/{{ item.filename }}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;" muted preload="metadata"></video>
+        <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;border-radius:8px;font-size:.72rem;display:flex;align-items:center;gap:4px;">
+          <i class="fa fa-play"></i> Video
+        </div>
+      {% endif %}
+      <div style="padding:8px;">
+        {% if item.caption %}
+        <p style="font-size:.75rem;color:#374151;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.caption }}</p>
+        {% endif %}
+        <p style="font-size:.7rem;color:#9ca3af;">{{ item.created_at.strftime('%d %b %Y') }}</p>
+      </div>
+      <div style="padding:0 8px 8px;">
+        <a href="/admin/media/delete/{{ item.id }}"
+           onclick="return confirm('Delete this media file?')"
+           class="btn btn-sm btn-danger" style="width:100%;justify-content:center;">
+          <i class="fa fa-trash"></i> Delete
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#9ca3af;padding:40px;">
+    <i class="fa fa-images fa-3x" style="display:block;margin-bottom:16px;opacity:.3;"></i>
+    No media uploaded yet.
+  </p>
+  {% endif %}
+</div>
+
+{% block extra_scripts %}
+<script>
+function handleMediaSelect(input) {
+  const files = Array.from(input.files);
+  document.getElementById('selectedCount').textContent =
+    files.length ? `${files.length} file(s) selected` : '';
+
+  const preview = document.getElementById('mediaPreview');
+  preview.innerHTML = '';
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'preview-thumb';
+      div.style.cssText = 'border-radius:10px;overflow:hidden;aspect-ratio:1;background:#f3f4f6;';
+      if (file.type.startsWith('video')) {
+        div.innerHTML = `<video src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" muted></video>
+          <div style="position:absolute;bottom:4px;left:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;padding:3px 6px;border-radius:6px;text-align:center;">${file.name.substring(0,20)}</div>`;
+        div.style.position = 'relative';
+      } else {
+        div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;"/>`;
+      }
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Upload with progress simulation
+document.getElementById('mediaUploadForm').addEventListener('submit', function(e) {
+  const files = document.getElementById('mediaInput').files;
+  if (!files.length) return;
+  document.getElementById('uploadProgress').style.display = 'flex';
+  document.getElementById('uploadBtn').disabled = true;
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(progress + Math.random() * 15, 90);
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('progressText').textContent = `Uploading… ${Math.round(progress)}%`;
+  }, 400);
+  // Form submits normally; progress bar just indicates activity
+});
+
+function filterAdmin(type, btn) {
+  document.querySelectorAll('[id^=filter]').forEach(b => {
+    b.className = 'btn btn-sm btn-outline';
+  });
+  btn.className = 'btn btn-sm btn-primary';
+  document.querySelectorAll('.media-admin-item').forEach(item => {
+    item.style.display = (type === 'all' || item.dataset.type === type) ? 'block' : 'none';
+  });
+}
+
+// Drag-drop
+const drop = document.getElementById('mediaDropArea');
+if (drop) {
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor='var(--primary)'; drop.style.background='#f5f3ff'; });
+  drop.addEventListener('dragleave', () => { drop.style.borderColor=''; drop.style.background=''; });
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.style.borderColor=''; drop.style.background='';
+    document.getElementById('mediaInput').files = e.dataTransfer.files;
+    handleMediaSelect(document.getElementById('mediaInput'));
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

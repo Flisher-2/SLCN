@@ -1,0 +1,96 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Elders – Admin{% endblock %}
+{% block page_title %}Elders{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-user-plus"></i> Add New Elder</h3></div>
+  <form method="POST" action="/admin/elders" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" name="name" required placeholder="Elder James Johnson"/>
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" placeholder="Elder" value="Elder"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone" placeholder="+1 234 567 8900"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="elder@church.org"/>
+      </div>
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" name="order_num" value="0" min="0"/>
+      </div>
+      <div class="form-group">
+        <label>Photo</label>
+        <div class="file-upload-wrap">
+          <div class="file-upload-area">
+            <i class="fa fa-user-circle"></i>
+            <p>Click to upload photo</p>
+            <p style="font-size:.78rem;color:#9ca3af;">JPG, PNG accepted</p>
+            <input type="file" name="photo" accept="image/*" data-preview="elderPhotoPreview"/>
+          </div>
+        </div>
+        <div id="elderPhotoPreview" class="preview-grid"></div>
+      </div>
+      <div class="form-group full">
+        <label>Biography</label>
+        <textarea name="bio" rows="4" placeholder="Write a brief bio about this elder..."></textarea>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> Add Elder</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h3><i class="fa fa-list"></i> All Elders ({{ elders|length }})</h3>
+  </div>
+  {% if elders %}
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>Photo</th><th>Name</th><th>Title</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for e in elders %}
+        <tr>
+          <td>
+            {% if e.photo %}
+              <img src="/static/{{ e.photo }}" alt="{{ e.name }}" class="table-img"/>
+            {% else %}
+              <div style="width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;">
+                <i class="fa fa-user"></i>
+              </div>
+            {% endif %}
+          </td>
+          <td><strong>{{ e.name }}</strong></td>
+          <td><span class="badge badge-success">{{ e.title }}</span></td>
+          <td>{% if e.phone %}<a href="tel:{{ e.phone }}" style="color:var(--primary)">{{ e.phone }}</a>{% else %}<span style="color:#ccc">—</span>{% endif %}</td>
+          <td>{% if e.email %}<a href="mailto:{{ e.email }}" style="color:var(--primary)">{{ e.email }}</a>{% else %}<span style="color:#ccc">—</span>{% endif %}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <a href="/admin/elders/edit/{{ e.id }}" class="btn btn-sm btn-outline"><i class="fa fa-edit"></i> Edit</a>
+              <a href="/admin/elders/delete/{{ e.id }}"
+                 onclick="return confirm('Delete {{ e.name }}?')"
+                 class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#9ca3af;padding:40px;"><i class="fa fa-users fa-2x" style="display:block;margin-bottom:12px;opacity:.3;"></i>No elders added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

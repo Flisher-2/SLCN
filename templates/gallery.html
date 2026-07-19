@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Gallery – {{ CHURCH_NAME }}{% endblock %}
+{% block extra_head %}
+<style>
+  .page-hero { padding:120px 5% 80px; background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95); text-align:center; color:#fff; }
+  .page-hero h1 { font-size:clamp(2.5rem,5vw,4rem); margin-bottom:14px; }
+  .gallery-container { padding:80px 5%; max-width:1400px; margin:0 auto; }
+  .filter-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; justify-content:center; }
+  .filter-tab {
+    padding:8px 22px; border-radius:25px; border:2px solid var(--primary);
+    color:var(--primary); font-weight:600; cursor:pointer; transition:all .2s; background:transparent;
+    font-size:.9rem;
+  }
+  .filter-tab.active, .filter-tab:hover { background:var(--primary); color:#fff; }
+  .masonry-grid {
+    columns: 4 220px; column-gap: 12px;
+  }
+  .masonry-item {
+    break-inside: avoid; margin-bottom: 12px;
+    border-radius: 12px; overflow: hidden; cursor: pointer;
+    position: relative; background: #f3f4f6;
+  }
+  .masonry-item img, .masonry-item video {
+    width: 100%; display: block; transition: transform .4s;
+  }
+  .masonry-item:hover img, .masonry-item:hover video { transform: scale(1.04); }
+  .masonry-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%);
+    opacity: 0; transition: opacity .3s;
+    display: flex; align-items: flex-end; padding: 14px;
+  }
+  .masonry-item:hover .masonry-overlay { opacity: 1; }
+  .masonry-caption { color: #fff; font-size: .85rem; font-weight: 500; }
+  .video-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(0,0,0,.6); color: #fff;
+    padding: 4px 10px; border-radius: 20px; font-size: .75rem;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); z-index:9999; align-items:center; justify-content:center; }
+  .lightbox.open { display:flex; }
+  .lb-close { position:absolute; top:20px; right:20px; color:#fff; font-size:2.5rem; cursor:pointer; background:none; border:none; }
+  .lb-caption { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#fff; font-size:.9rem; background:rgba(0,0,0,.5); padding:8px 20px; border-radius:20px; }
+  .empty-state { text-align:center; padding:80px 20px; color:var(--gray); }
+  .empty-state i { font-size:4rem; margin-bottom:16px; opacity:.3; display:block; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <h1 data-aos="fade-up">Our Gallery</h1>
+  <p data-aos="fade-up" data-aos-delay="100">Moments of worship, fellowship, and God's grace</p>
+</div>
+
+<div class="gallery-container">
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterMedia('all',this)">All</button>
+    <button class="filter-tab" onclick="filterMedia('image',this)">Photos</button>
+    <button class="filter-tab" onclick="filterMedia('video',this)">Videos</button>
+  </div>
+
+  {% if media %}
+  <div class="masonry-grid" id="mediaGrid">
+    {% for item in media %}
+    <div class="masonry-item" data-type="{{ item.media_type }}"
+         onclick="openLightbox('/static/{{ item.filename }}','{{ item.media_type }}','{{ item.caption }}')">
+      {% if item.media_type == 'image' %}
+        <img src="/static/{{ item.filename }}" alt="{{ item.caption }}" loading="lazy"/>
+      {% else %}
+        <video src="/static/{{ item.filename }}" muted preload="metadata"></video>
+        <div class="video-badge"><i class="fa fa-play"></i> Video</div>
+      {% endif %}
+      <div class="masonry-overlay">
+        <span class="masonry-caption">
+          <i class="fa {% if item.media_type=='video' %}fa-play-circle{% else %}fa-search-plus{% endif %}"></i>
+          {% if item.caption %} {{ item.caption }}{% endif %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa fa-images"></i>
+    <h3>No media yet</h3>
+    <p>Check back soon for photos and videos from our services.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">&times;</button>
+  <img id="lbImg" src="" alt="" style="display:none;max-width:90vw;max-height:85vh;border-radius:12px;"/>
+  <video id="lbVid" src="" controls style="display:none;max-width:90vw;max-height:85vh;border-radius:12px;"></video>
+  <div class="lb-caption" id="lbCaption"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function filterMedia(type, btn) {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.masonry-item').forEach(item => {
+      item.style.display = (type === 'all' || item.dataset.type === type) ? 'block' : 'none';
+    });
+  }
+  function openLightbox(src, type, caption) {
+    const lb = document.getElementById('lightbox');
+    const img = document.getElementById('lbImg');
+    const vid = document.getElementById('lbVid');
+    const cap = document.getElementById('lbCaption');
+    cap.textContent = caption || '';
+    if (type === 'video') {
+      img.style.display = 'none'; vid.src = src; vid.style.display = 'block';
+    } else {
+      vid.style.display = 'none'; img.src = src; img.style.display = 'block';
+    }
+    lb.classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lbVid').pause();
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+</script>
+{% endblock %}

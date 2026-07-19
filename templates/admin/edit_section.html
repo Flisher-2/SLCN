@@ -1,0 +1,48 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Edit Section – Admin{% endblock %}
+{% block page_title %}Edit Section{% endblock %}
+{% block body %}
+<div class="panel">
+  <div class="panel-header">
+    <h3><i class="fa fa-edit"></i> Edit: {{ section.title }}</h3>
+    <a href="/admin/sections" class="btn btn-sm btn-outline"><i class="fa fa-arrow-left"></i> Back</a>
+  </div>
+  <form method="POST" action="/admin/sections/edit/{{ section.id }}" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Section Title</label>
+        <input type="text" name="title" value="{{ section.title }}" required/>
+      </div>
+      <div class="form-group">
+        <label>Display Order</label>
+        <input type="number" name="order_num" value="{{ section.order_num }}"/>
+      </div>
+      <div class="form-group full">
+        <label>Content Text</label>
+        <textarea name="body" rows="6">{{ section.body }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>Section Image</label>
+        {% if section.image %}
+        <div style="margin-bottom:12px;">
+          <p style="font-size:.85rem;color:#6b7280;margin-bottom:8px;">Current image:</p>
+          <img src="/static/{{ section.image }}" style="max-height:160px;border-radius:10px;object-fit:cover;"/>
+        </div>
+        {% endif %}
+        <div class="file-upload-wrap">
+          <div class="file-upload-area">
+            <i class="fa fa-image"></i>
+            <p>Upload new image (leave empty to keep current)</p>
+            <input type="file" name="image" accept="image/*" data-preview="editSectionPreview"/>
+          </div>
+        </div>
+        <div id="editSectionPreview" class="preview-grid"></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:12px;">
+      <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Changes</button>
+      <a href="/admin/sections" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

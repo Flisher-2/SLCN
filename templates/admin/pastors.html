@@ -1,0 +1,96 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Pastors – Admin{% endblock %}
+{% block page_title %}Pastors{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-user-plus"></i> Add New Pastor</h3></div>
+  <form method="POST" action="/admin/pastors" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" name="name" required placeholder="Pastor John Smith"/>
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" placeholder="Senior Pastor" value="Pastor"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone" placeholder="+1 234 567 8900"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="pastor@church.org"/>
+      </div>
+      <div class="form-group">
+        <label>Display Order (lower = first)</label>
+        <input type="number" name="order_num" value="0" min="0"/>
+      </div>
+      <div class="form-group">
+        <label>Photo</label>
+        <div class="file-upload-wrap">
+          <div class="file-upload-area">
+            <i class="fa fa-user-circle"></i>
+            <p>Click to upload photo</p>
+            <p style="font-size:.78rem;color:#9ca3af;">JPG, PNG – portrait orientation best</p>
+            <input type="file" name="photo" accept="image/*" data-preview="pastorPhotoPreview"/>
+          </div>
+        </div>
+        <div id="pastorPhotoPreview" class="preview-grid"></div>
+      </div>
+      <div class="form-group full">
+        <label>Biography</label>
+        <textarea name="bio" rows="4" placeholder="Write a brief bio about this pastor..."></textarea>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Pastor</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h3><i class="fa fa-list"></i> All Pastors ({{ pastors|length }})</h3>
+  </div>
+  {% if pastors %}
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>Photo</th><th>Name</th><th>Title</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for p in pastors %}
+        <tr>
+          <td>
+            {% if p.photo %}
+              <img src="/static/{{ p.photo }}" alt="{{ p.name }}" class="table-img"/>
+            {% else %}
+              <div style="width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;">
+                <i class="fa fa-user"></i>
+              </div>
+            {% endif %}
+          </td>
+          <td><strong>{{ p.name }}</strong></td>
+          <td><span class="badge badge-purple">{{ p.title }}</span></td>
+          <td>{% if p.phone %}<a href="tel:{{ p.phone }}" style="color:var(--primary)">{{ p.phone }}</a>{% else %}<span style="color:#ccc">—</span>{% endif %}</td>
+          <td>{% if p.email %}<a href="mailto:{{ p.email }}" style="color:var(--primary)">{{ p.email }}</a>{% else %}<span style="color:#ccc">—</span>{% endif %}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <a href="/admin/pastors/edit/{{ p.id }}" class="btn btn-sm btn-outline"><i class="fa fa-edit"></i> Edit</a>
+              <a href="/admin/pastors/delete/{{ p.id }}"
+                 onclick="return confirm('Delete {{ p.name }}?')"
+                 class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#9ca3af;padding:40px;"><i class="fa fa-user-slash fa-2x" style="display:block;margin-bottom:12px;opacity:.3;"></i>No pastors added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

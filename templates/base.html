@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="{{ CHURCH_NAME }} – {{ TAGLINE }}"/>
+  <title>{% block title %}{{ CHURCH_NAME }}{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- AOS Animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"/>
+
+  <style>
+    :root {
+      --primary:   {{ THEME_COLOR }};
+      --accent:    {{ ACCENT_COLOR }};
+      --dark:      #0f0e17;
+      --light:     #f9f7ff;
+      --white:     #ffffff;
+      --gray:      #6b7280;
+      --card-bg:   #ffffffee;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+    h1,h2,h3,h4 { font-family: 'Playfair Display', serif; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    /* ── Announcement Bar ── */
+    .announce-bar {
+      background: var(--primary);
+      color: #fff;
+      text-align: center;
+      padding: 8px 20px;
+      font-size: .85rem;
+      font-weight: 500;
+      letter-spacing: .3px;
+      overflow: hidden;
+    }
+    .announce-scroll {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 25s linear infinite;
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,.08);
+      padding: 0 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .nav-logo {
+      width: 50px; height: 50px; border-radius: 50%;
+      object-fit: cover; border: 2px solid var(--primary);
+    }
+    .nav-logo-placeholder {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: var(--primary); display: flex;
+      align-items: center; justify-content: center;
+      color: #fff; font-size: 1.3rem;
+    }
+    .nav-church-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--primary); line-height: 1.2;
+    }
+    .nav-tagline { font-size: .7rem; color: var(--gray); }
+    .nav-links {
+      display: flex; gap: 6px; list-style: none; align-items: center;
+    }
+    .nav-links a {
+      padding: 8px 14px; border-radius: 8px;
+      font-weight: 500; font-size: .92rem;
+      transition: all .2s;
+      color: var(--dark);
+    }
+    .nav-links a:hover, .nav-links a.active {
+      background: var(--primary); color: #fff;
+    }
+    .nav-links .btn-donate {
+      background: var(--accent); color: var(--dark) !important;
+      font-weight: 700; padding: 8px 18px; border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(245,158,11,.3);
+    }
+    .nav-links .btn-donate:hover {
+      background: var(--primary); color: #fff !important;
+    }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 5px;
+    }
+    .hamburger span {
+      width: 25px; height: 3px; background: var(--dark);
+      border-radius: 3px; transition: all .3s;
+    }
+
+    /* ── Flash messages ── */
+    .flash-container {
+      position: fixed; top: 80px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .flash-msg {
+      padding: 14px 20px; border-radius: 10px;
+      font-size: .9rem; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+      animation: slideIn .3s ease;
+      max-width: 350px;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+    .flash-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+    .flash-error   { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+    .flash-info    { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--dark); color: #ccc;
+      padding: 60px 5% 30px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 40px; margin-bottom: 40px;
+    }
+    .footer-col h4 {
+      color: var(--accent); font-size: 1.1rem;
+      margin-bottom: 16px;
+    }
+    .footer-col p, .footer-col a {
+      font-size: .88rem; line-height: 1.8; color: #aaa;
+    }
+    .footer-col a:hover { color: var(--accent); }
+    .social-links { display: flex; gap: 12px; margin-top: 12px; }
+    .social-links a {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; font-size: 1rem;
+    }
+    .social-links a:hover { background: var(--primary); color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 24px; text-align: center;
+      font-size: .82rem; color: #777;
+    }
+
+    /* ── Section headings ── */
+    .section-header { text-align: center; margin-bottom: 50px; }
+    .section-header h2 {
+      font-size: clamp(2rem,4vw,2.8rem);
+      color: var(--dark); margin-bottom: 12px;
+    }
+    .section-header p { color: var(--gray); max-width: 600px; margin: 0 auto; }
+    .section-divider {
+      width: 60px; height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 2px; margin: 12px auto;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,.12); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 28px; border-radius: 30px;
+      font-weight: 600; font-size: .95rem;
+      cursor: pointer; border: none;
+      transition: all .25s; text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary); color: #fff;
+      box-shadow: 0 4px 15px rgba(124,58,237,.35);
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-2px); }
+    .btn-accent {
+      background: var(--accent); color: var(--dark);
+      box-shadow: 0 4px 15px rgba(245,158,11,.35);
+    }
+    .btn-accent:hover { opacity: .9; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+
+    /* ── Responsive ── */
+    @media(max-width:768px) {
+      .nav-links {
+        display: none; position: absolute;
+        top: 72px; left: 0; right: 0;
+        background: #fff; flex-direction: column;
+        padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      }
+      .nav-links.open { display: flex; }
+      .hamburger { display: flex; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  {% if SITE_ANNOUNCEMENTS %}
+  <div class="announce-bar">
+    <span class="announce-scroll">
+      {% for a in SITE_ANNOUNCEMENTS %}📢 {{ a.text }}{% if not loop.last %} &nbsp;|&nbsp; {% endif %}{% endfor %}
+    </span>
+  </div>
+  {% endif %}
+
+  <!-- Flash Messages -->
+  <div class="flash-container" id="flashContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}">
+          <i class="fa {% if cat=='success' %}fa-check-circle{% elif cat=='error' %}fa-times-circle{% else %}fa-info-circle{% endif %}"></i>
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="nav-brand">
+      {% if LOGO %}
+        <img src="/static/{{ LOGO }}" alt="Logo" class="nav-logo"/>
+      {% else %}
+        <div class="nav-logo-placeholder"><i class="fa fa-church"></i></div>
+      {% endif %}
+      <div>
+        <div class="nav-church-name">{{ CHURCH_NAME }}</div>
+        <div class="nav-tagline">{{ TAGLINE }}</div>
+      </div>
+    </a>
+
+    <div class="hamburger" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </div>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" {% if request.endpoint=='index' %}class="active"{% endif %}>Home</a></li>
+      <li><a href="/about" {% if request.endpoint=='about' %}class="active"{% endif %}>About</a></li>
+      <li><a href="/events" {% if request.endpoint=='events' %}class="active"{% endif %}>Events</a></li>
+      <li><a href="/gallery" {% if request.endpoint=='gallery' %}class="active"{% endif %}>Gallery</a></li>
+      <li><a href="/contact" {% if request.endpoint=='contact' %}class="active"{% endif %}>Contact</a></li>
+      {% if IS_ADMIN %}
+      <li><a href="/admin/dashboard" style="color:var(--accent);font-weight:700;"><i class="fa fa-cog"></i> Admin</a></li>
+      {% else %}
+      <li><a href="/admin" style="color:var(--gray);font-size:.8rem;"><i class="fa fa-lock"></i></a></li>
+      {% endif %}
+      <li><a href="#give" class="btn-donate">Give Now</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Content -->
+  {% block content %}{% endblock %}
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        {% if LOGO %}
+          <img src="/static/{{ LOGO }}" alt="Logo" style="width:60px;border-radius:50%;margin-bottom:12px;"/>
+        {% endif %}
+        <h4>{{ CHURCH_NAME }}</h4>
+        <p>{{ TAGLINE }}</p>
+        <div class="social-links">
+          {% set fb = get_setting('facebook_url','') if get_setting is defined else '' %}
+          {% set yt = get_setting('youtube_url','') if get_setting is defined else '' %}
+          {% set ig = get_setting('instagram_url','') if get_setting is defined else '' %}
+          {% set tw = get_setting('twitter_url','') if get_setting is defined else '' %}
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="/">Home</a><br>
+        <a href="/about">About Us</a><br>
+        <a href="/events">Events</a><br>
+        <a href="/gallery">Gallery</a><br>
+        <a href="/contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Service Times</h4>
+        {% set st = get_setting('service_times','') %}
+        {% for line in st.split('\n') %}
+          <p>{{ line }}</p>
+        {% endfor %}
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        {% set addr = get_setting('address','') %}
+        {% set ph   = get_setting('contact_phone','') %}
+        {% set em   = get_setting('contact_email','') %}
+        {% if addr %}<p><i class="fa fa-map-marker-alt" style="color:var(--accent)"></i> {{ addr }}</p>{% endif %}
+        {% if ph   %}<p><i class="fa fa-phone" style="color:var(--accent)"></i> {{ ph }}</p>{% endif %}
+        {% if em   %}<p><i class="fa fa-envelope" style="color:var(--accent)"></i> {{ em }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>{{ get_setting('footer_text','© 2024 ' ~ CHURCH_NAME ~ '. All rights reserved.') }}</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script>
+    AOS.init({ duration: 700, once: true, offset: 60 });
+
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+
+    // Auto-dismiss flash messages
+    setTimeout(() => {
+      document.querySelectorAll('.flash-msg').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(100%)';
+        el.style.transition = 'all .4s';
+        setTimeout(() => el.remove(), 400);
+      });
+    }, 4000);
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Contact – {{ CHURCH_NAME }}{% endblock %}
+{% block extra_head %}
+<style>
+  .page-hero { padding:120px 5% 80px; background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95); text-align:center; color:#fff; }
+  .page-hero h1 { font-size:clamp(2.5rem,5vw,4rem); margin-bottom:14px; }
+  .contact-container { max-width:1100px; margin:0 auto; padding:80px 5%; }
+  .contact-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:50px; }
+  .contact-info-card { background:#fff; border-radius:20px; padding:40px; box-shadow:0 4px 20px rgba(0,0,0,.07); }
+  .contact-info-card h3 { font-size:1.6rem; margin-bottom:24px; color:var(--dark); }
+  .info-item { display:flex; gap:16px; align-items:flex-start; margin-bottom:24px; }
+  .info-icon { width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg,var(--primary),#a855f7); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem; flex-shrink:0; }
+  .info-content h4 { font-size:.95rem; font-weight:600; margin-bottom:4px; }
+  .info-content p, .info-content a { font-size:.9rem; color:var(--gray); line-height:1.6; text-decoration:none; }
+  .info-content a:hover { color:var(--primary); }
+  .service-times-box { background:linear-gradient(135deg,var(--primary),#a855f7); color:#fff; border-radius:16px; padding:24px; margin-top:24px; }
+  .service-times-box h4 { margin-bottom:12px; font-size:1.1rem; }
+  .service-times-box p { font-size:.88rem; opacity:.9; line-height:1.8; }
+  .directions-card { background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.07); }
+  .map-frame { width:100%; height:420px; border:none; }
+  .dir-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(135deg,var(--primary),#a855f7);
+    color:#fff; padding:18px; font-weight:700; font-size:1rem;
+    text-decoration:none; transition:all .3s;
+  }
+  .dir-btn:hover { opacity:.9; }
+  @media(max-width:768px) { .contact-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <h1 data-aos="fade-up">Contact Us</h1>
+  <p data-aos="fade-up" data-aos-delay="100">We'd love to hear from you and welcome you to our family</p>
+</div>
+
+<div class="contact-container">
+  <div class="contact-grid">
+    <div>
+      <div class="contact-info-card" data-aos="fade-right">
+        <h3>Get In Touch</h3>
+        {% if address %}
+        <div class="info-item">
+          <div class="info-icon"><i class="fa fa-map-marker-alt"></i></div>
+          <div class="info-content">
+            <h4>Our Address</h4>
+            <p>{{ address }}</p>
+          </div>
+        </div>
+        {% endif %}
+        {% if phone %}
+        <div class="info-item">
+          <div class="info-icon"><i class="fa fa-phone"></i></div>
+          <div class="info-content">
+            <h4>Phone</h4>
+            <a href="tel:{{ phone }}">{{ phone }}</a>
+          </div>
+        </div>
+        {% endif %}
+        {% if email %}
+        <div class="info-item">
+          <div class="info-icon"><i class="fa fa-envelope"></i></div>
+          <div class="info-content">
+            <h4>Email</h4>
+            <a href="mailto:{{ email }}">{{ email }}</a>
+          </div>
+        </div>
+        {% endif %}
+        {% set st = get_setting('service_times','') %}
+        {% if st %}
+        <div class="service-times-box">
+          <h4><i class="fa fa-clock"></i> Service Times</h4>
+          {% for line in st.split('\n') %}
+          {% if line.strip() %}<p>{{ line }}</p>{% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div data-aos="fade-left">
+      <div class="directions-card">
+        <iframe
+          class="map-frame"
+          src="https://maps.google.com/maps?q={{ map_code }}&output=embed&z=16"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Church Location">
+        </iframe>
+        <a href="https://maps.google.com/maps?q={{ map_code }}" target="_blank" class="dir-btn">
+          <i class="fa fa-map-marked-alt"></i> Get Full Directions on Google Maps
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

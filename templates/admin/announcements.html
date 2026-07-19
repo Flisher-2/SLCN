@@ -1,0 +1,53 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Announcements – Admin{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+{% block body %}
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-bullhorn"></i> Add Announcement</h3></div>
+  <p style="font-size:.88rem;color:#6b7280;margin-bottom:16px;">Announcements scroll across the top of the website in a banner bar.</p>
+  <form method="POST" action="/admin/announcements">
+    <div class="form-group">
+      <label>Announcement Text</label>
+      <textarea name="text" rows="2" required placeholder="Join us this Sunday for a special worship service…"></textarea>
+    </div>
+    <div style="margin-top:12px;">
+      <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Announcement</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-list"></i> All Announcements</h3></div>
+  {% if announcements %}
+  <table>
+    <thead><tr><th>Text</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for a in announcements %}
+      <tr>
+        <td style="max-width:400px;">{{ a.text }}</td>
+        <td>
+          <span class="badge {% if a.active %}badge-success{% else %}badge-gray{% endif %}">
+            {{ 'Active' if a.active else 'Hidden' }}
+          </span>
+        </td>
+        <td>{{ a.created_at.strftime('%d %b %Y') }}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <a href="/admin/announcements/toggle/{{ a.id }}" class="btn btn-sm btn-outline">
+              <i class="fa {% if a.active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+              {% if a.active %}Hide{% else %}Show{% endif %}
+            </a>
+            <a href="/admin/announcements/delete/{{ a.id }}"
+               onclick="return confirm('Delete this announcement?')"
+               class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="text-align:center;color:#9ca3af;padding:30px;">No announcements yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

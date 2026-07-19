@@ -1,0 +1,93 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard – Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="stat-grid">
+  <div class="stat-card">
+    <i class="fa fa-user-tie"></i>
+    <div class="num">{{ stats.pastors }}</div>
+    <p>Pastors</p>
+  </div>
+  <div class="stat-card">
+    <i class="fa fa-users"></i>
+    <div class="num">{{ stats.elders }}</div>
+    <p>Elders</p>
+  </div>
+  <div class="stat-card">
+    <i class="fa fa-photo-video"></i>
+    <div class="num">{{ stats.media }}</div>
+    <p>Media Files</p>
+  </div>
+  <div class="stat-card">
+    <i class="fa fa-calendar"></i>
+    <div class="num">{{ stats.events }}</div>
+    <p>Events</p>
+  </div>
+  <div class="stat-card">
+    <i class="fa fa-image"></i>
+    <div class="num">{{ stats.backgrounds }}</div>
+    <p>Backgrounds</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+  <!-- Quick Actions -->
+  <div class="panel">
+    <div class="panel-header"><h3>Quick Actions</h3></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <a href="/admin/backgrounds" class="btn btn-primary"><i class="fa fa-image"></i> Add Background</a>
+      <a href="/admin/pastors" class="btn btn-success"><i class="fa fa-user-plus"></i> Add Pastor</a>
+      <a href="/admin/elders" class="btn btn-accent"><i class="fa fa-users"></i> Add Elder</a>
+      <a href="/admin/media" class="btn btn-outline"><i class="fa fa-upload"></i> Upload Media</a>
+      <a href="/admin/events" class="btn btn-outline"><i class="fa fa-calendar-plus"></i> Add Event</a>
+      <a href="/admin/settings" class="btn btn-outline"><i class="fa fa-cog"></i> Settings</a>
+    </div>
+  </div>
+
+  <!-- Recent Events -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Recent Events</h3>
+      <a href="/admin/events" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    {% if recent_events %}
+    <table>
+      <thead><tr><th>Event</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for ev in recent_events %}
+        <tr>
+          <td>{{ ev.title }}</td>
+          <td><span class="badge badge-purple">{{ ev.event_date.strftime('%d %b %Y') }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#9ca3af;text-align:center;padding:20px;">No events yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel" style="margin-top:24px;">
+  <div class="panel-header"><h3>Admin Guide</h3></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+    <div style="padding:16px;background:#f9fafb;border-radius:12px;">
+      <p style="font-size:.85rem;font-weight:600;color:var(--primary);margin-bottom:6px;"><i class="fa fa-image"></i> Backgrounds</p>
+      <p style="font-size:.82rem;color:#6b7280;">Upload hero slideshow background images for the homepage.</p>
+    </div>
+    <div style="padding:16px;background:#f9fafb;border-radius:12px;">
+      <p style="font-size:.85rem;font-weight:600;color:var(--primary);margin-bottom:6px;"><i class="fa fa-cog"></i> Site Settings</p>
+      <p style="font-size:.82rem;color:#6b7280;">Change church name, logo, colors, contact info, and map location.</p>
+    </div>
+    <div style="padding:16px;background:#f9fafb;border-radius:12px;">
+      <p style="font-size:.85rem;font-weight:600;color:var(--primary);margin-bottom:6px;"><i class="fa fa-map-pin"></i> Map Location</p>
+      <p style="font-size:.82rem;color:#6b7280;">Update your Plus Code (e.g. VP22+2EZC) in Site Settings → Map Location.</p>
+    </div>
+    <div style="padding:16px;background:#f9fafb;border-radius:12px;">
+      <p style="font-size:.85rem;font-weight:600;color:var(--primary);margin-bottom:6px;"><i class="fa fa-photo-video"></i> Media</p>
+      <p style="font-size:.82rem;color:#6b7280;">Upload photos and videos from services. Supports MP4, JPG, PNG and more.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

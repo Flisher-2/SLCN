@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Events – {{ CHURCH_NAME }}{% endblock %}
+{% block extra_head %}
+<style>
+  .page-hero { padding:120px 5% 80px; background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95); text-align:center; color:#fff; }
+  .page-hero h1 { font-size:clamp(2.5rem,5vw,4rem); margin-bottom:14px; }
+  .events-container { max-width:1100px; margin:0 auto; padding:80px 5%; }
+  .events-title { font-size:1.8rem; margin-bottom:30px; color:var(--dark); display:flex; align-items:center; gap:12px; }
+  .events-title::after { content:''; flex:1; height:2px; background:linear-gradient(90deg,var(--primary),transparent); }
+  .event-full-card {
+    background:#fff; border-radius:16px; padding:30px; margin-bottom:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,.06); display:flex; gap:24px; align-items:flex-start;
+    transition:transform .3s,box-shadow .3s;
+  }
+  .event-full-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,.1); }
+  .event-date-badge {
+    display:flex; flex-direction:column; align-items:center;
+    background:linear-gradient(135deg,var(--primary),#a855f7);
+    color:#fff; border-radius:14px; padding:12px 18px; min-width:70px;
+    font-weight:700; flex-shrink:0;
+  }
+  .event-date-badge .day { font-size:2rem; line-height:1; }
+  .event-date-badge .month { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; opacity:.85; }
+  .event-date-badge .year { font-size:.75rem; opacity:.7; }
+  .event-detail h3 { font-size:1.3rem; margin-bottom:8px; color:var(--dark); }
+  .event-detail .meta { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:10px; }
+  .event-detail .meta span { font-size:.85rem; color:var(--gray); display:flex; align-items:center; gap:5px; }
+  .event-detail p { font-size:.92rem; color:#555; line-height:1.7; }
+  .empty-state { text-align:center; padding:60px 20px; color:var(--gray); }
+  .empty-state i { font-size:4rem; margin-bottom:16px; opacity:.3; }
+  .past-badge { display:inline-block; background:#f3f4f6; color:#9ca3af; font-size:.75rem; padding:3px 10px; border-radius:10px; margin-bottom:8px; }
+  @media(max-width:600px){ .event-full-card { flex-direction:column; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <h1 data-aos="fade-up">Church Events</h1>
+  <p data-aos="fade-up" data-aos-delay="100">Stay connected with our community calendar</p>
+</div>
+
+<div class="events-container">
+  <h2 class="events-title"><i class="fa fa-calendar-check" style="color:var(--primary)"></i> Upcoming Events</h2>
+  {% if upcoming %}
+    {% for ev in upcoming %}
+    <div class="event-full-card" data-aos="fade-up" data-aos-delay="{{ loop.index*60 }}">
+      <div class="event-date-badge">
+        <span class="day">{{ ev.event_date.strftime('%d') }}</span>
+        <span class="month">{{ ev.event_date.strftime('%b') }}</span>
+        <span class="year">{{ ev.event_date.strftime('%Y') }}</span>
+      </div>
+      <div class="event-detail">
+        <h3>{{ ev.title }}</h3>
+        <div class="meta">
+          {% if ev.event_time %}
+          <span><i class="fa fa-clock"></i> {{ ev.event_time }}</span>
+          {% endif %}
+          {% if ev.location %}
+          <span><i class="fa fa-map-pin"></i> {{ ev.location }}</span>
+          {% endif %}
+        </div>
+        {% if ev.description %}<p>{{ ev.description }}</p>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fa fa-calendar-times"></i>
+      <p>No upcoming events at this time. Check back soon!</p>
+    </div>
+  {% endif %}
+
+  {% if past %}
+  <h2 class="events-title" style="margin-top:60px;"><i class="fa fa-history" style="color:var(--gray)"></i> Past Events</h2>
+    {% for ev in past %}
+    <div class="event-full-card" style="opacity:.65;" data-aos="fade-up">
+      <div class="event-date-badge" style="background:linear-gradient(135deg,#6b7280,#9ca3af);">
+        <span class="day">{{ ev.event_date.strftime('%d') }}</span>
+        <span class="month">{{ ev.event_date.strftime('%b') }}</span>
+        <span class="year">{{ ev.event_date.strftime('%Y') }}</span>
+      </div>
+      <div class="event-detail">
+        <span class="past-badge">Past Event</span>
+        <h3>{{ ev.title }}</h3>
+        <div class="meta">
+          {% if ev.event_time %}<span><i class="fa fa-clock"></i> {{ ev.event_time }}</span>{% endif %}
+          {% if ev.location %}<span><i class="fa fa-map-pin"></i> {{ ev.location }}</span>{% endif %}
+        </div>
+        {% if ev.description %}<p>{{ ev.description }}</p>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

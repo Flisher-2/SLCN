@@ -1,0 +1,165 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Site Settings – Admin{% endblock %}
+{% block page_title %}Site Settings{% endblock %}
+
+{% block body %}
+<form method="POST" action="/admin/settings" enctype="multipart/form-data">
+  <!-- Church Identity -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-church"></i> Church Identity</h3></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Church Name</label>
+        <input type="text" name="church_name" value="{{ settings.church_name }}" required/>
+      </div>
+      <div class="form-group">
+        <label>Tagline / Slogan</label>
+        <input type="text" name="tagline" value="{{ settings.tagline }}"/>
+      </div>
+      <div class="form-group full">
+        <label>Welcome Message (shown on homepage)</label>
+        <textarea name="welcome_message" rows="3">{{ settings.welcome_message }}</textarea>
+      </div>
+      <div class="form-group full">
+        <label>Service Times (one per line)</label>
+        <textarea name="service_times" rows="4">{{ settings.service_times }}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logo Upload -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-image"></i> Website Logo</h3></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+      <div>
+        <label>Upload New Logo (PNG/JPG recommended)</label>
+        <div class="file-upload-wrap">
+          <div class="file-upload-area">
+            <i class="fa fa-cloud-upload-alt"></i>
+            <p>Click or drag to upload logo</p>
+            <p style="font-size:.78rem;color:#9ca3af;margin-top:4px;">PNG with transparent background works best</p>
+            <input type="file" name="logo" accept="image/*" data-preview="logoPreview"/>
+          </div>
+        </div>
+        <div id="logoPreview" class="preview-grid"></div>
+      </div>
+      {% if settings.logo %}
+      <div>
+        <label>Current Logo</label>
+        <img src="/static/{{ settings.logo }}" alt="Logo" style="max-width:150px;border-radius:12px;border:2px solid #e5e7eb;padding:8px;"/>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Colors -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-palette"></i> Theme Colors</h3></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Primary Color</label>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <input type="color" name="theme_color" value="{{ settings.theme_color }}" style="width:60px;height:42px;padding:2px;"/>
+          <input type="text" id="themeHex" value="{{ settings.theme_color }}" style="flex:1;" oninput="document.querySelector('[name=theme_color]').value=this.value"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Accent Color</label>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <input type="color" name="accent_color" value="{{ settings.accent_color }}" style="width:60px;height:42px;padding:2px;"/>
+          <input type="text" id="accentHex" value="{{ settings.accent_color }}" oninput="document.querySelector('[name=accent_color]').value=this.value"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Info -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-address-card"></i> Contact Information</h3></div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Church Address</label>
+        <input type="text" name="address" value="{{ settings.address }}" placeholder="123 Church Street, City"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="contact_phone" value="{{ settings.contact_phone }}" placeholder="+1 (555) 000-0000"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="contact_email" value="{{ settings.contact_email }}" placeholder="info@church.org"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Location -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-map-marked-alt"></i> Google Maps Location</h3></div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:20px;">
+      <p style="font-size:.88rem;color:#92400e;">
+        <i class="fa fa-info-circle"></i>
+        <strong>How to find your Plus Code:</strong> Open Google Maps, tap on your church location, and copy the Plus Code (e.g. <strong>VP22+2EZC</strong>). You can also use a full address like <em>"123 Church St, Lagos"</em>.
+      </p>
+    </div>
+    <div class="form-group">
+      <label>Map Location (Plus Code or Address)</label>
+      <input type="text" name="map_location" value="{{ settings.map_location }}" placeholder="VP22+2EZC"/>
+    </div>
+    {% if settings.map_location %}
+    <div style="margin-top:16px;border-radius:12px;overflow:hidden;">
+      <iframe src="https://maps.google.com/maps?q={{ settings.map_location }}&output=embed&z=16"
+        width="100%" height="280" style="border:none;" allowfullscreen loading="lazy"></iframe>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Social Media -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-share-alt"></i> Social Media Links</h3></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook URL</label>
+        <input type="url" name="facebook_url" value="{{ settings.facebook_url }}" placeholder="https://facebook.com/..."/>
+      </div>
+      <div class="form-group">
+        <label><i class="fab fa-youtube" style="color:#ff0000"></i> YouTube URL</label>
+        <input type="url" name="youtube_url" value="{{ settings.youtube_url }}" placeholder="https://youtube.com/..."/>
+      </div>
+      <div class="form-group">
+        <label><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram URL</label>
+        <input type="url" name="instagram_url" value="{{ settings.instagram_url }}" placeholder="https://instagram.com/..."/>
+      </div>
+      <div class="form-group">
+        <label><i class="fab fa-twitter" style="color:#1da1f2"></i> Twitter/X URL</label>
+        <input type="url" name="twitter_url" value="{{ settings.twitter_url }}" placeholder="https://twitter.com/..."/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="panel">
+    <div class="panel-header"><h3><i class="fa fa-align-center"></i> Footer Text</h3></div>
+    <div class="form-group">
+      <label>Footer Copyright Text</label>
+      <input type="text" name="footer_text" value="{{ settings.footer_text }}" placeholder="© 2024 Church Name. All rights reserved."/>
+    </div>
+  </div>
+
+  <div style="text-align:right;margin-bottom:40px;">
+    <button type="submit" class="btn btn-primary" style="padding:14px 36px;font-size:1rem;">
+      <i class="fa fa-save"></i> Save All Settings
+    </button>
+  </div>
+</form>
+
+{% block extra_scripts %}
+<script>
+  document.querySelector('[name=theme_color]').addEventListener('input', function() {
+    document.getElementById('themeHex').value = this.value;
+  });
+  document.querySelector('[name=accent_color]').addEventListener('input', function() {
+    document.getElementById('accentHex').value = this.value;
+  });
+</script>
+{% endblock %}
+{% endblock %}

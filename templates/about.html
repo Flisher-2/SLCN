@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}About – {{ CHURCH_NAME }}{% endblock %}
+{% block extra_head %}
+<style>
+  .page-hero {
+    padding: 120px 5% 80px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    text-align: center; color: #fff;
+  }
+  .page-hero h1 { font-size: clamp(2.5rem,5vw,4rem); margin-bottom: 14px; }
+  .page-hero p { font-size: 1.1rem; opacity: .85; max-width: 600px; margin: 0 auto; }
+  .people-grid {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 28px;
+  }
+  .person-card {
+    background: #fff; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.07); transition: transform .3s,box-shadow .3s; text-align: center;
+  }
+  .person-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,.12); }
+  .person-photo { width: 100%; height: 280px; object-fit: cover; object-position: top; }
+  .person-photo-placeholder {
+    width: 100%; height: 280px;
+    background: linear-gradient(135deg,var(--primary),#a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem; color: rgba(255,255,255,.4);
+  }
+  .person-info { padding: 24px 20px 28px; }
+  .person-title {
+    display: inline-block; background: var(--accent); color: var(--dark);
+    font-size: .78rem; font-weight: 700; padding: 4px 14px; border-radius: 20px;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .person-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+  .person-bio { font-size: .88rem; color: var(--gray); line-height: 1.7; margin-bottom: 16px; }
+  .person-contact { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .contact-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px; font-size: .82rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+  }
+  .contact-phone { background: #d1fae5; color: #065f46; }
+  .contact-phone:hover { background: #10b981; color: #fff; }
+  .contact-email { background: #dbeafe; color: #1e40af; }
+  .contact-email:hover { background: #3b82f6; color: #fff; }
+  .about-section { padding: 80px 5%; }
+  .about-section:nth-child(even) { background: #fff; }
+  .desc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; max-width: 1100px; margin: 0 auto; }
+  .desc-row.reverse { direction: rtl; }
+  .desc-row.reverse > * { direction: ltr; }
+  .desc-img { border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+  .desc-img img { width: 100%; height: 380px; object-fit: cover; }
+  @media(max-width:768px) { .desc-row { grid-template-columns: 1fr; } .desc-row.reverse { direction: ltr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <h1 data-aos="fade-up">About Our Church</h1>
+  <p data-aos="fade-up" data-aos-delay="100">Get to know the people and mission behind {{ CHURCH_NAME }}</p>
+</div>
+
+{% for sec in sections %}
+<section class="about-section" style="background:{% if loop.index is odd %}var(--light){% else %}#fff{% endif %}">
+  <div class="desc-row {% if loop.index is even %}reverse{% endif %}">
+    {% if sec.image %}
+    <div class="desc-img" data-aos="fade-{% if loop.index is odd %}right{% else %}left{% endif %}">
+      <img src="/static/{{ sec.image }}" alt="{{ sec.title }}"/>
+    </div>
+    {% endif %}
+    <div data-aos="fade-{% if loop.index is odd %}left{% else %}right{% endif %}">
+      <h2>{{ sec.title }}</h2>
+      <div style="width:50px;height:4px;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:2px;margin:12px 0 20px;"></div>
+      <p style="color:var(--gray);line-height:1.9;">{{ sec.body }}</p>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+{% if pastors %}
+<section style="padding:90px 5%; background:var(--light);">
+  <div style="text-align:center;margin-bottom:50px;" data-aos="fade-up">
+    <h2>Our Pastors</h2>
+    <div style="width:60px;height:4px;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:2px;margin:12px auto;"></div>
+    <p style="color:var(--gray);">Dedicated shepherds guiding our congregation</p>
+  </div>
+  <div class="people-grid">
+    {% for p in pastors %}
+    <div class="person-card" data-aos="fade-up" data-aos-delay="{{ loop.index*80 }}">
+      {% if p.photo %}
+        <img src="/static/{{ p.photo }}" alt="{{ p.name }}" class="person-photo"/>
+      {% else %}
+        <div class="person-photo-placeholder"><i class="fa fa-user"></i></div>
+      {% endif %}
+      <div class="person-info">
+        <span class="person-title">{{ p.title }}</span>
+        <div class="person-name">{{ p.name }}</div>
+        {% if p.bio %}<p class="person-bio">{{ p.bio }}</p>{% endif %}
+        <div class="person-contact">
+          {% if p.phone %}<a href="tel:{{ p.phone }}" class="contact-btn contact-phone"><i class="fa fa-phone"></i> {{ p.phone }}</a>{% endif %}
+          {% if p.email %}<a href="mailto:{{ p.email }}" class="contact-btn contact-email"><i class="fa fa-envelope"></i> Email</a>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if elders %}
+<section style="padding:90px 5%; background:#fff;">
+  <div style="text-align:center;margin-bottom:50px;" data-aos="fade-up">
+    <h2>Our Elders</h2>
+    <div style="width:60px;height:4px;background:linear-gradient(90deg,#10b981,#059669);border-radius:2px;margin:12px auto;"></div>
+    <p style="color:var(--gray);">Faithful servants leading with integrity</p>
+  </div>
+  <div class="people-grid">
+    {% for e in elders %}
+    <div class="person-card" data-aos="fade-up" data-aos-delay="{{ loop.index*80 }}">
+      {% if e.photo %}
+        <img src="/static/{{ e.photo }}" alt="{{ e.name }}" class="person-photo"/>
+      {% else %}
+        <div class="person-photo-placeholder" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fa fa-user"></i></div>
+      {% endif %}
+      <div class="person-info">
+        <span class="person-title" style="background:#d1fae5;color:#065f46;">{{ e.title }}</span>
+        <div class="person-name">{{ e.name }}</div>
+        {% if e.bio %}<p class="person-bio">{{ e.bio }}</p>{% endif %}
+        <div class="person-contact">
+          {% if e.phone %}<a href="tel:{{ e.phone }}" class="contact-btn contact-phone"><i class="fa fa-phone"></i> {{ e.phone }}</a>{% endif %}
+          {% if e.email %}<a href="mailto:{{ e.email }}" class="contact-btn contact-email"><i class="fa fa-envelope"></i> Email</a>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

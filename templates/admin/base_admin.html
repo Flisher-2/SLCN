@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% block title %}Admin – Church{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root{--primary:#7c3aed;--accent:#f59e0b;--dark:#0f0e17;--sidebar:#1e1b4b;--sidebar-hover:#312e81;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#f3f4f6;display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:260px;background:var(--sidebar);min-height:100vh;position:fixed;top:0;left:0;
+      display:flex;flex-direction:column;z-index:100;transition:transform .3s;}
+    .sidebar-header{padding:28px 24px;border-bottom:1px solid rgba(255,255,255,.08);}
+    .sidebar-header h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.2rem;}
+    .sidebar-header p{color:rgba(255,255,255,.4);font-size:.78rem;margin-top:4px;}
+    .sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+    .nav-section{padding:8px 16px;color:rgba(255,255,255,.35);font-size:.7rem;font-weight:600;
+      text-transform:uppercase;letter-spacing:1.5px;margin-top:12px;}
+    .sidebar-nav a{display:flex;align-items:center;gap:12px;padding:11px 24px;
+      color:rgba(255,255,255,.65);font-size:.9rem;text-decoration:none;transition:all .2s;
+      border-left:3px solid transparent;}
+    .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.08);
+      color:#fff;border-left-color:var(--accent);}
+    .sidebar-nav a i{width:18px;text-align:center;font-size:.95rem;}
+    .sidebar-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);}
+    .sidebar-footer a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.5);
+      font-size:.85rem;text-decoration:none;transition:color .2s;}
+    .sidebar-footer a:hover{color:#fff;}
+
+    /* MAIN */
+    .main-content{margin-left:260px;flex:1;padding:0;min-height:100vh;}
+    .topbar{background:#fff;padding:16px 30px;box-shadow:0 1px 10px rgba(0,0,0,.06);
+      display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:1.3rem;color:var(--dark);}
+    .topbar-right{display:flex;align-items:center;gap:16px;}
+    .topbar-right a{font-size:.85rem;color:var(--primary);font-weight:500;text-decoration:none;}
+    .admin-badge{background:linear-gradient(135deg,var(--primary),#a855f7);color:#fff;
+      padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600;}
+    .page-body{padding:30px;}
+
+    /* Cards */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin-bottom:28px;}
+    .stat-card{background:#fff;border-radius:16px;padding:24px;text-align:center;
+      box-shadow:0 2px 12px rgba(0,0,0,.05);}
+    .stat-card .num{font-size:2.5rem;font-weight:700;color:var(--primary);line-height:1;}
+    .stat-card p{font-size:.85rem;color:#6b7280;margin-top:6px;}
+    .stat-card i{font-size:1.8rem;margin-bottom:10px;color:var(--primary);opacity:.5;}
+
+    .panel{background:#fff;border-radius:16px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.05);margin-bottom:24px;}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;}
+    .panel-header h3{font-size:1.1rem;color:var(--dark);}
+
+    /* Forms */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .form-group{margin-bottom:0;}
+    .form-group.full{grid-column:1/-1;}
+    label{display:block;font-size:.85rem;font-weight:600;color:#374151;margin-bottom:6px;}
+    input[type=text],input[type=email],input[type=tel],input[type=number],
+    input[type=date],input[type=time],input[type=color],input[type=url],
+    select,textarea{
+      width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;
+      font-size:.92rem;font-family:'Inter',sans-serif;
+      transition:border-color .2s,box-shadow .2s;background:#fff;color:#111;}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+    textarea{resize:vertical;min-height:100px;}
+    .file-upload-area{border:2px dashed #d1d5db;border-radius:12px;padding:30px;text-align:center;
+      cursor:pointer;transition:all .2s;background:#fafafa;}
+    .file-upload-area:hover{border-color:var(--primary);background:#f5f3ff;}
+    .file-upload-area i{font-size:2.2rem;color:var(--primary);margin-bottom:10px;display:block;}
+    .file-upload-area p{font-size:.9rem;color:#6b7280;}
+    .file-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .file-upload-wrap{position:relative;display:inline-block;width:100%;}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;
+      font-weight:600;font-size:.9rem;cursor:pointer;border:none;text-decoration:none;transition:all .2s;}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(124,58,237,.3);}
+    .btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+    .btn-accent{background:var(--accent);color:#111;}
+    .btn-accent:hover{opacity:.9;}
+    .btn-danger{background:#ef4444;color:#fff;}
+    .btn-danger:hover{background:#dc2626;}
+    .btn-success{background:#10b981;color:#fff;}
+    .btn-sm{padding:7px 14px;font-size:.82rem;}
+    .btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary);}
+    .btn-outline:hover{background:var(--primary);color:#fff;}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:.8rem;font-weight:600;color:#6b7280;
+      text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;
+      background:#f9fafb;border-bottom:1px solid #e5e7eb;}
+    td{padding:12px 14px;border-bottom:1px solid #f3f4f6;font-size:.9rem;vertical-align:middle;}
+    tr:hover td{background:#fafafa;}
+    .table-img{width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:top;}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;}
+    .badge-success{background:#d1fae5;color:#065f46;}
+    .badge-gray{background:#f3f4f6;color:#6b7280;}
+    .badge-purple{background:#ede9fe;color:#6d28d9;}
+    .badge-blue{background:#dbeafe;color:#1e40af;}
+
+    /* Flash */
+    .flash{padding:13px 18px;border-radius:10px;margin-bottom:20px;font-size:.9rem;display:flex;align-items:center;gap:10px;}
+    .flash-success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
+    .flash-error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+    .flash-info{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+
+    /* Preview */
+    .preview-img{width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-top:10px;}
+    .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:16px;}
+    .preview-thumb{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;}
+    .preview-thumb img,.preview-thumb video{width:100%;height:100%;object-fit:cover;}
+    .preview-thumb .del-btn{position:absolute;top:5px;right:5px;background:rgba(239,68,68,.9);
+      color:#fff;border:none;border-radius:6px;padding:4px 7px;cursor:pointer;font-size:.75rem;}
+
+    /* Responsive */
+    @media(max-width:900px){
+      .sidebar{transform:translateX(-260px);}
+      .sidebar.open{transform:translateX(0);}
+      .main-content{margin-left:0;}
+      .form-grid{grid-template-columns:1fr;}
+    }
+    .mob-menu{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--dark);}
+    @media(max-width:900px){.mob-menu{display:block;}}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fa fa-church"></i> Church Admin</h2>
+    <p>Welcome back, Eugene</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="/admin/dashboard" {% if request.endpoint=='admin_dashboard' %}class="active"{% endif %}>
+      <i class="fa fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/" target="_blank"><i class="fa fa-external-link-alt"></i> View Website</a>
+
+    <div class="nav-section">Content</div>
+    <a href="/admin/settings" {% if request.endpoint=='admin_settings' %}class="active"{% endif %}>
+      <i class="fa fa-cog"></i> Site Settings
+    </a>
+    <a href="/admin/backgrounds" {% if request.endpoint=='admin_backgrounds' %}class="active"{% endif %}>
+      <i class="fa fa-image"></i> Backgrounds
+    </a>
+    <a href="/admin/sections" {% if request.endpoint in ['admin_sections','edit_section'] %}class="active"{% endif %}>
+      <i class="fa fa-align-left"></i> Description Sections
+    </a>
+    <a href="/admin/announcements" {% if request.endpoint=='admin_announcements' %}class="active"{% endif %}>
+      <i class="fa fa-bullhorn"></i> Announcements
+    </a>
+
+    <div class="nav-section">People</div>
+    <a href="/admin/pastors" {% if request.endpoint in ['admin_pastors','edit_pastor'] %}class="active"{% endif %}>
+      <i class="fa fa-user-tie"></i> Pastors
+    </a>
+    <a href="/admin/elders" {% if request.endpoint in ['admin_elders','edit_elder'] %}class="active"{% endif %}>
+      <i class="fa fa-users"></i> Elders
+    </a>
+
+    <div class="nav-section">Ministry</div>
+    <a href="/admin/events" {% if request.endpoint in ['admin_events','edit_event'] %}class="active"{% endif %}>
+      <i class="fa fa-calendar"></i> Events
+    </a>
+    <a href="/admin/media" {% if request.endpoint=='admin_media' %}class="active"{% endif %}>
+      <i class="fa fa-photo-video"></i> Media (Photos/Videos)
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/admin/logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="mob-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+    </div>
+    <div class="topbar-right">
+      <a href="/" target="_blank"><i class="fa fa-eye"></i> View Site</a>
+      <span class="admin-badge"><i class="fa fa-user-shield"></i> Eugene</span>
+    </div>
+  </div>
+
+  <div class="page-body">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">
+          <i class="fa {% if cat=='success' %}fa-check-circle{% elif cat=='error' %}fa-times-circle{% else %}fa-info-circle{% endif %}"></i>
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block body %}{% endblock %}
+  </div>
+</div>
+
+<script>
+  // File upload preview
+  document.querySelectorAll('input[type=file]').forEach(input => {
+    input.addEventListener('change', function() {
+      const previewId = this.dataset.preview;
+      if (!previewId) return;
+      const container = document.getElementById(previewId);
+      if (!container) return;
+      container.innerHTML = '';
+      Array.from(this.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const div = document.createElement('div');
+          div.className = 'preview-thumb';
+          if (file.type.startsWith('video')) {
+            div.innerHTML = `<video src="${e.target.result}" muted style="width:100%;height:100%;object-fit:cover;"></video>`;
+          } else {
+            div.innerHTML = `<img src="${e.target.result}" alt="Preview"/>`;
+          }
+          container.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  });
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

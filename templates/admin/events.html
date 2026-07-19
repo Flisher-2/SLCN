@@ -1,0 +1,143 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Events – Admin{% endblock %}
+{% block page_title %}Events Calendar{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-calendar-plus"></i> Add New Event</h3></div>
+  <form method="POST" action="/admin/events">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Event Title *</label>
+        <input type="text" name="title" required placeholder="Sunday Thanksgiving Service"/>
+      </div>
+      <div class="form-group">
+        <label>Event Date *</label>
+        <input type="date" name="event_date" required/>
+      </div>
+      <div class="form-group">
+        <label>Event Time</label>
+        <input type="time" name="event_time"/>
+      </div>
+      <div class="form-group full">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Main Auditorium / Online / etc."/>
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Event description..."></textarea>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Event</button>
+    </div>
+  </form>
+</div>
+
+<!-- Calendar View -->
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-calendar-alt"></i> Calendar View</h3></div>
+  <div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;"></div>
+</div>
+
+<!-- Upcoming Events -->
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-calendar-check"></i> Upcoming Events</h3></div>
+  {% if upcoming %}
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Title</th><th>Date</th><th>Time</th><th>Location</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for ev in upcoming %}
+        <tr>
+          <td><strong>{{ ev.title }}</strong><br><small style="color:#9ca3af;">{{ ev.description[:60] }}{% if ev.description|length>60 %}…{% endif %}</small></td>
+          <td><span class="badge badge-purple">{{ ev.event_date.strftime('%d %b %Y') }}</span></td>
+          <td>{{ ev.event_time or '—' }}</td>
+          <td>{{ ev.location or '—' }}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <a href="/admin/events/edit/{{ ev.id }}" class="btn btn-sm btn-outline"><i class="fa fa-edit"></i> Edit</a>
+              <a href="/admin/events/delete/{{ ev.id }}"
+                 onclick="return confirm('Delete this event?')"
+                 class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#9ca3af;padding:30px;">No upcoming events.</p>
+  {% endif %}
+</div>
+
+<!-- Past Events -->
+{% if past %}
+<div class="panel">
+  <div class="panel-header"><h3><i class="fa fa-history"></i> Past Events</h3></div>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Title</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for ev in past %}
+        <tr style="opacity:.65;">
+          <td><strong>{{ ev.title }}</strong></td>
+          <td><span class="badge badge-gray">{{ ev.event_date.strftime('%d %b %Y') }}</span></td>
+          <td>
+            <a href="/admin/events/delete/{{ ev.id }}"
+               onclick="return confirm('Delete this event?')"
+               class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% block extra_scripts %}
+<script>
+// Simple calendar
+const now = new Date();
+const year = now.getFullYear();
+const month = now.getMonth();
+const daysInMonth = new Date(year, month+1, 0).getDate();
+const firstDay  = new Date(year, month, 1).getDay();
+
+const eventDays = [
+  {% for ev in upcoming %}
+  {% if ev.event_date.year == now.year and ev.event_date.month == (now.month+1) %}
+  { day: {{ ev.event_date.day }}, title: "{{ ev.title|replace('"','') }}" },
+  {% endif %}
+  {% endfor %}
+];
+
+const grid = document.getElementById('calendarGrid');
+const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+// Header
+days.forEach(d => {
+  const el = document.createElement('div');
+  el.style.cssText = 'padding:8px;font-size:.75rem;font-weight:700;color:#6b7280;background:#f9fafb;border-radius:4px;';
+  el.textContent = d;
+  grid.appendChild(el);
+});
+// Empty cells
+for (let i=0;i<firstDay;i++) {
+  grid.appendChild(document.createElement('div'));
+}
+// Day cells
+for (let d=1;d<=daysInMonth;d++) {
+  const ev = eventDays.find(e=>e.day===d);
+  const el = document.createElement('div');
+  el.style.cssText = `padding:8px 4px;min-height:52px;border-radius:6px;font-size:.82rem;cursor:default;
+    background:${ev?'#ede9fe':'#f9fafb'};border:1px solid ${ev?'#c4b5fd':'#e5e7eb'};
+    color:${d===now.getDate()?'#fff':'#374151'};
+    ${d===now.getDate()?'background:var(--primary);border-color:var(--primary);':''}`;
+  el.innerHTML = `<div style="font-weight:700;">${d}</div>${ev?`<div style="font-size:.65rem;color:#7c3aed;margin-top:2px;line-height:1.2;">${ev.title.substring(0,20)}</div>`:''}`;
+  grid.appendChild(el);
+}
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+{% block title %}{{ CHURCH_NAME }} – Home{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Hero ── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-slideshow {
+    position: absolute; inset: 0;
+    background: var(--dark);
+  }
+  .hero-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  .hero-slide.active { opacity: 1; }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(15,14,23,.75) 0%, rgba(124,58,237,.45) 100%);
+  }
+  .hero-content {
+    position: relative; text-align: center;
+    color: #fff; padding: 40px 5%; max-width: 900px;
+  }
+  .hero-badge {
+    display: inline-block; background: var(--accent);
+    color: var(--dark); font-weight: 700; font-size: .8rem;
+    padding: 6px 18px; border-radius: 25px;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero-title {
+    font-size: clamp(2.5rem,7vw,5rem);
+    font-weight: 900; line-height: 1.1;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .hero-sub {
+    font-size: clamp(1rem,2vw,1.3rem);
+    margin-bottom: 36px; opacity: .9;
+    max-width: 600px; margin-left: auto; margin-right: auto;
+  }
+  .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .slide-dots {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,.4); cursor: pointer;
+    transition: all .3s;
+  }
+  .dot.active { background: var(--accent); transform: scale(1.3); }
+
+  /* ── Welcome ── */
+  .welcome-section {
+    padding: 90px 5%; text-align: center;
+    background: linear-gradient(135deg, var(--light) 0%, #ede9fe 100%);
+  }
+  .welcome-icon {
+    font-size: 3rem; margin-bottom: 20px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .welcome-text {
+    max-width: 700px; margin: 0 auto;
+    font-size: 1.15rem; line-height: 1.9; color: #444;
+  }
+
+  /* ── Service Times ── */
+  .service-section { padding: 80px 5%; background: var(--white); }
+  .service-cards {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 24px; max-width: 900px; margin: 0 auto;
+  }
+  .service-card {
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    color: #fff; border-radius: 20px;
+    padding: 30px 24px; text-align: center;
+    box-shadow: 0 8px 30px rgba(124,58,237,.3);
+  }
+  .service-card i { font-size: 2.2rem; margin-bottom: 12px; color: var(--accent); }
+  .service-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .service-card p { font-size: .88rem; opacity: .85; }
+
+  /* ── Info Boxes ── */
+  .info-boxes {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 0;
+  }
+  .info-box {
+    padding: 40px 30px; text-align: center;
+    background: var(--primary); color: #fff;
+  }
+  .info-box:nth-child(2) { background: var(--accent); color: var(--dark); }
+  .info-box:nth-child(3) { background: #10b981; }
+  .info-box:nth-child(4) { background: var(--dark); }
+  .info-box h3 { font-size: 2.5rem; font-weight: 900; margin-bottom: 6px; }
+  .info-box p { font-size: .9rem; opacity: .85; }
+
+  /* ── Pastors ── */
+  .pastors-section { padding: 90px 5%; background: var(--light); }
+  .people-grid {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 28px;
+  }
+  .person-card {
+    background: #fff; border-radius: 20px;
+    overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.07);
+    transition: transform .3s, box-shadow .3s;
+    text-align: center;
+  }
+  .person-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,.12); }
+  .person-photo {
+    width: 100%; height: 280px; object-fit: cover;
+    object-position: top;
+  }
+  .person-photo-placeholder {
+    width: 100%; height: 280px;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem; color: rgba(255,255,255,.4);
+  }
+  .person-info { padding: 24px 20px 28px; }
+  .person-title {
+    display: inline-block; background: var(--accent);
+    color: var(--dark); font-size: .78rem; font-weight: 700;
+    padding: 4px 14px; border-radius: 20px;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .person-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+  .person-bio { font-size: .88rem; color: var(--gray); line-height: 1.7; margin-bottom: 16px; }
+  .person-contact { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .contact-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px; font-size: .82rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+  }
+  .contact-phone { background: #d1fae5; color: #065f46; }
+  .contact-phone:hover { background: #10b981; color: #fff; }
+  .contact-email { background: #dbeafe; color: #1e40af; }
+  .contact-email:hover { background: #3b82f6; color: #fff; }
+
+  /* ── Description Sections ── */
+  .desc-section { padding: 90px 5%; }
+  .desc-section:nth-child(even) { background: var(--white); }
+  .desc-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center; max-width: 1100px; margin: 0 auto;
+  }
+  .desc-row.reverse { direction: rtl; }
+  .desc-row.reverse > * { direction: ltr; }
+  .desc-img {
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,.12);
+  }
+  .desc-img img { width: 100%; height: 380px; object-fit: cover; }
+  .desc-text h2 { font-size: 2.2rem; margin-bottom: 16px; color: var(--dark); }
+  .desc-text p { color: var(--gray); line-height: 1.9; font-size: 1rem; }
+
+  /* ── Events ── */
+  .events-section { padding: 90px 5%; background: linear-gradient(135deg, #1e1b4b, #312e81); }
+  .events-section .section-header h2 { color: #fff; }
+  .events-section .section-header p { color: #a5b4fc; }
+  .events-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 24px; }
+  .event-card {
+    background: rgba(255,255,255,.07);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px; padding: 28px 24px;
+    color: #fff; transition: all .3s;
+  }
+  .event-card:hover { background: rgba(255,255,255,.12); transform: translateY(-4px); }
+  .event-date-badge {
+    display: inline-flex; flex-direction: column; align-items: center;
+    background: var(--accent); color: var(--dark);
+    border-radius: 12px; padding: 8px 14px; margin-bottom: 16px;
+    font-weight: 700; min-width: 60px;
+  }
+  .event-date-badge .day { font-size: 1.8rem; line-height: 1; }
+  .event-date-badge .month { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; }
+  .event-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+  .event-meta { font-size: .85rem; opacity: .75; }
+
+  /* ── Gallery ── */
+  .gallery-section { padding: 90px 5%; background: var(--white); }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 12px;
+  }
+  .gallery-item {
+    border-radius: 12px; overflow: hidden;
+    aspect-ratio: 1; cursor: pointer;
+    position: relative;
+  }
+  .gallery-item img, .gallery-item video {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .4s;
+  }
+  .gallery-item:hover img, .gallery-item:hover video { transform: scale(1.08); }
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: rgba(124,58,237,.6);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .3s; color: #fff; font-size: 2rem;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+  /* ── Directions ── */
+  .directions-section { padding: 80px 5%; background: var(--light); }
+  .directions-card {
+    background: #fff; border-radius: 24px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.1); max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .directions-info { padding: 50px 40px; }
+  .directions-info h3 { font-size: 1.8rem; margin-bottom: 20px; }
+  .directions-info p { color: var(--gray); line-height: 1.8; margin-bottom: 8px; }
+  .dir-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    color: #fff; padding: 14px 28px; border-radius: 30px;
+    font-weight: 700; font-size: 1rem; margin-top: 24px;
+    box-shadow: 0 6px 20px rgba(124,58,237,.4);
+    text-decoration: none; transition: all .3s;
+    cursor: pointer; border: none;
+  }
+  .dir-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(124,58,237,.5); }
+  .directions-map iframe {
+    width: 100%; height: 100%; min-height: 350px; border: none;
+  }
+
+  /* ── Give Section ── */
+  #give {
+    padding: 100px 5%; text-align: center;
+    background: linear-gradient(135deg, var(--accent) 0%, #fbbf24 100%);
+  }
+  #give h2 { font-size: 2.8rem; margin-bottom: 16px; color: var(--dark); }
+  #give p { font-size: 1.1rem; color: rgba(0,0,0,.7); max-width: 600px; margin: 0 auto 30px; }
+
+  /* Lightbox */
+  .lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.92); z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img, .lightbox video { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+  .lb-close {
+    position: absolute; top: 20px; right: 20px;
+    color: #fff; font-size: 2.5rem; cursor: pointer;
+    background: none; border: none;
+  }
+
+  @media(max-width:768px) {
+    .desc-row { grid-template-columns: 1fr; }
+    .desc-row.reverse { direction: ltr; }
+    .directions-card { grid-template-columns: 1fr; }
+    .info-boxes { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-slideshow" id="heroSlideshow">
+    {% if BG_LIST %}
+      {% for bg in BG_LIST %}
+      <div class="hero-slide {% if loop.first %}active{% endif %}"
+           style="background-image:url('/static/{{ bg.filename }}')"></div>
+      {% endfor %}
+    {% else %}
+      <div class="hero-slide active"
+           style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)"></div>
+    {% endif %}
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-content" data-aos="fade-up">
+    <span class="hero-badge">✝ Welcome Home</span>
+    <h1 class="hero-title">{{ CHURCH_NAME }}</h1>
+    <p class="hero-sub">{{ TAGLINE }}</p>
+    <div class="hero-actions">
+      <a href="/about" class="btn btn-primary"><i class="fa fa-heart"></i> Learn About Us</a>
+      <a href="/contact" class="btn btn-accent"><i class="fa fa-map-marker-alt"></i> Get Directions</a>
+    </div>
+  </div>
+  {% if BG_LIST|length > 1 %}
+  <div class="slide-dots" id="slideDots">
+    {% for bg in BG_LIST %}
+    <div class="dot {% if loop.first %}active{% endif %}" onclick="goToSlide({{ loop.index0 }})"></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<!-- WELCOME -->
+<section class="welcome-section">
+  <div class="welcome-icon">🙏</div>
+  <div data-aos="fade-up">
+    <div class="section-header">
+      <h2>A Warm Welcome</h2>
+      <div class="section-divider"></div>
+    </div>
+    <p class="welcome-text">{{ welcome_msg }}</p>
+  </div>
+</section>
+
+<!-- INFO STATS -->
+<div class="info-boxes">
+  <div class="info-box" data-aos="fade-right">
+    <h3 id="cnt-pastors">{{ pastors|length }}</h3>
+    <p>Pastors & Leaders</p>
+  </div>
+  <div class="info-box" data-aos="fade-up">
+    <h3 id="cnt-elders">{{ elders|length }}</h3>
+    <p>Church Elders</p>
+  </div>
+  <div class="info-box" data-aos="fade-up">
+    <h3>7</h3>
+    <p>Days of Prayer</p>
+  </div>
+  <div class="info-box" data-aos="fade-left">
+    <h3>∞</h3>
+    <p>God's Blessings</p>
+  </div>
+</div>
+
+<!-- SERVICE TIMES -->
+<section class="service-section" id="services">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Service Times</h2>
+    <div class="section-divider"></div>
+    <p>Join us for worship and fellowship</p>
+  </div>
+  <div class="service-cards">
+    {% set lines = service_times.split('\n') %}
+    {% for line in lines %}
+    {% if line.strip() %}
+    <div class="service-card" data-aos="zoom-in" data-aos-delay="{{ loop.index * 80 }}">
+      <i class="fa {% if 'sunday' in line.lower() %}fa-sun{% elif 'wednesday' in line.lower() %}fa-bible{% else %}fa-pray{% endif %}"></i>
+      <h3>{{ line.split(':')[0] }}</h3>
+      <p>{{ line.split(':', 1)[1] if ':' in line else '' }}</p>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<!-- DESCRIPTION SECTIONS -->
+{% for sec in sections %}
+<section class="desc-section" style="background:{% if loop.index is odd %}var(--light){% else %}var(--white){% endif %}">
+  <div class="desc-row {% if loop.index is even %}reverse{% endif %}">
+    {% if sec.image %}
+    <div class="desc-img" data-aos="fade-{% if loop.index is odd %}right{% else %}left{% endif %}">
+      <img src="/static/{{ sec.image }}" alt="{{ sec.title }}"/>
+    </div>
+    {% endif %}
+    <div class="desc-text" data-aos="fade-{% if loop.index is odd %}left{% else %}right{% endif %}">
+      <h2>{{ sec.title }}</h2>
+      <div class="section-divider" style="margin:12px 0;"></div>
+      <p>{{ sec.body }}</p>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+<!-- PASTORS -->
+{% if pastors %}
+<section class="pastors-section" id="pastors">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Our Pastors</h2>
+    <div class="section-divider"></div>
+    <p>Dedicated shepherds guiding our congregation with wisdom and love</p>
+  </div>
+  <div class="people-grid">
+    {% for p in pastors %}
+    <div class="person-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 80 }}">
+      {% if p.photo %}
+        <img src="/static/{{ p.photo }}" alt="{{ p.name }}" class="person-photo"/>
+      {% else %}
+        <div class="person-photo-placeholder"><i class="fa fa-user"></i></div>
+      {% endif %}
+      <div class="person-info">
+        <span class="person-title">{{ p.title }}</span>
+        <div class="person-name">{{ p.name }}</div>
+        {% if p.bio %}
+        <p class="person-bio">{{ p.bio[:120] }}{% if p.bio|length > 120 %}…{% endif %}</p>
+        {% endif %}
+        <div class="person-contact">
+          {% if p.phone %}
+          <a href="tel:{{ p.phone }}" class="contact-btn contact-phone">
+            <i class="fa fa-phone"></i> {{ p.phone }}
+          </a>
+          {% endif %}
+          {% if p.email %}
+          <a href="mailto:{{ p.email }}" class="contact-btn contact-email">
+            <i class="fa fa-envelope"></i> Email
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ELDERS -->
+{% if elders %}
+<section style="padding:90px 5%; background:var(--white);" id="elders">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Our Elders</h2>
+    <div class="section-divider"></div>
+    <p>Faithful servants who lead by example and serve with integrity</p>
+  </div>
+  <div class="people-grid">
+    {% for e in elders %}
+    <div class="person-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 80 }}">
+      {% if e.photo %}
+        <img src="/static/{{ e.photo }}" alt="{{ e.name }}" class="person-photo"/>
+      {% else %}
+        <div class="person-photo-placeholder" style="background:linear-gradient(135deg,#10b981,#059669)">
+          <i class="fa fa-user"></i>
+        </div>
+      {% endif %}
+      <div class="person-info">
+        <span class="person-title" style="background:#d1fae5;color:#065f46;">{{ e.title }}</span>
+        <div class="person-name">{{ e.name }}</div>
+        {% if e.bio %}
+        <p class="person-bio">{{ e.bio[:120] }}{% if e.bio|length > 120 %}…{% endif %}</p>
+        {% endif %}
+        <div class="person-contact">
+          {% if e.phone %}
+          <a href="tel:{{ e.phone }}" class="contact-btn contact-phone">
+            <i class="fa fa-phone"></i> {{ e.phone }}
+          </a>
+          {% endif %}
+          {% if e.email %}
+          <a href="mailto:{{ e.email }}" class="contact-btn contact-email">
+            <i class="fa fa-envelope"></i> Email
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- UPCOMING EVENTS -->
+{% if events %}
+<section class="events-section" id="events">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Upcoming Events</h2>
+    <div class="section-divider"></div>
+    <p>Stay connected with what's happening in our church community</p>
+  </div>
+  <div class="events-grid">
+    {% for ev in events %}
+    <div class="event-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 80 }}">
+      <div class="event-date-badge">
+        <span class="day">{{ ev.event_date.strftime('%d') }}</span>
+        <span class="month">{{ ev.event_date.strftime('%b') }}</span>
+      </div>
+      <div class="event-title">{{ ev.title }}</div>
+      {% if ev.event_time %}
+      <div class="event-meta"><i class="fa fa-clock"></i> {{ ev.event_time }}</div>
+      {% endif %}
+      {% if ev.location %}
+      <div class="event-meta"><i class="fa fa-map-pin"></i> {{ ev.location }}</div>
+      {% endif %}
+      {% if ev.description %}
+      <p style="font-size:.88rem;opacity:.7;margin-top:10px;line-height:1.6">{{ ev.description[:100] }}{% if ev.description|length > 100 %}…{% endif %}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div style="text-align:center;margin-top:36px;">
+    <a href="/events" class="btn btn-accent"><i class="fa fa-calendar"></i> View All Events</a>
+  </div>
+</section>
+{% endif %}
+
+<!-- GALLERY PREVIEW -->
+{% if images or videos %}
+<section class="gallery-section" id="gallery">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Life at Our Church</h2>
+    <div class="section-divider"></div>
+    <p>Moments of worship, fellowship, and community</p>
+  </div>
+  <div class="gallery-grid">
+    {% for img in images[:8] %}
+    <div class="gallery-item" data-aos="zoom-in" data-aos-delay="{{ loop.index * 50 }}"
+         onclick="openLightbox('/static/{{ img.filename }}','image')">
+      <img src="/static/{{ img.filename }}" alt="{{ img.caption }}" loading="lazy"/>
+      <div class="gallery-overlay"><i class="fa fa-search-plus"></i></div>
+    </div>
+    {% endfor %}
+    {% for vid in videos[:4] %}
+    <div class="gallery-item" data-aos="zoom-in"
+         onclick="openLightbox('/static/{{ vid.filename }}','video')">
+      <video src="/static/{{ vid.filename }}" muted></video>
+      <div class="gallery-overlay"><i class="fa fa-play-circle"></i></div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="text-align:center;margin-top:36px;">
+    <a href="/gallery" class="btn btn-primary"><i class="fa fa-images"></i> View Full Gallery</a>
+  </div>
+</section>
+{% endif %}
+
+<!-- GET DIRECTIONS -->
+<section class="directions-section" id="directions">
+  <div class="section-header" data-aos="fade-up">
+    <h2>Find Us</h2>
+    <div class="section-divider"></div>
+    <p>We'd love to see you in person</p>
+  </div>
+  <div class="directions-card" data-aos="zoom-in">
+    <div class="directions-info">
+      <h3>Come Visit Us</h3>
+      {% set addr = get_setting('address','') %}
+      {% set ph   = get_setting('contact_phone','') %}
+      {% if addr %}
+      <p><i class="fa fa-map-marker-alt" style="color:var(--primary)"></i> <strong>Address:</strong> {{ addr }}</p>
+      {% endif %}
+      {% if ph %}
+      <p><i class="fa fa-phone" style="color:var(--primary)"></i> <strong>Phone:</strong> {{ ph }}</p>
+      {% endif %}
+      <p style="margin-top:16px;"><i class="fa fa-clock" style="color:var(--primary)"></i> <strong>Service Times:</strong></p>
+      {% for line in service_times.split('\n') %}
+      {% if line.strip() %}<p style="padding-left:20px;">{{ line }}</p>{% endif %}
+      {% endfor %}
+
+      <a href="https://maps.google.com/maps?q={{ map_code }}" target="_blank" class="dir-btn">
+        <i class="fa fa-map-marked-alt"></i> Get Directions on Google Maps
+      </a>
+    </div>
+    <div class="directions-map">
+      <iframe
+        src="https://maps.google.com/maps?q={{ map_code }}&output=embed&z=16"
+        allowfullscreen loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Church Location">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- GIVE -->
+<section id="give">
+  <div data-aos="zoom-in">
+    <h2>Support Our Ministry</h2>
+    <p>Your generous giving helps us spread the Gospel and serve our community. Every gift makes a difference.</p>
+    <a href="mailto:{{ get_setting('contact_email','') }}" class="btn btn-primary">
+      <i class="fa fa-heart"></i> Give Today
+    </a>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">&times;</button>
+  <img id="lbImg" src="" alt="Preview" style="display:none"/>
+  <video id="lbVid" src="" controls style="display:none;max-width:90vw;max-height:90vh;border-radius:12px;"></video>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Hero slideshow
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots   = document.querySelectorAll('.dot');
+  let current  = 0;
+  function goToSlide(n) {
+    slides[current].classList.remove('active');
+    if (dots[current]) dots[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    if (dots[current]) dots[current].classList.add('active');
+  }
+  if (slides.length > 1) {
+    setInterval(() => goToSlide(current + 1), 5000);
+  }
+
+  // Lightbox
+  function openLightbox(src, type) {
+    const lb  = document.getElementById('lightbox');
+    const img = document.getElementById('lbImg');
+    const vid = document.getElementById('lbVid');
+    if (type === 'video') {
+      img.style.display = 'none';
+      vid.src = src; vid.style.display = 'block';
+    } else {
+      vid.style.display = 'none';
+      img.src = src; img.style.display = 'block';
+    }
+    lb.classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lbVid').pause();
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+</script>
+{% endblock %}
